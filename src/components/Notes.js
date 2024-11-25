@@ -6,6 +6,8 @@ function Notes() {
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newNote, setNewNote] = useState({ title: '', body: '', category: 'PERSONAL' });
+    const [error, setError] = useState(null);
+    const [user, setUser] = useState(null);  // Хранение данных пользователя
 
     const categories = [
         { value: 'BUSINESS', label: 'Business' },
@@ -14,27 +16,60 @@ function Notes() {
     ];
 
     useEffect(() => {
-        axios.get('http://127.0.0.1:8000/notes/')
+        // Запрос для получения заметок
+        axios.get('http://127.0.0.1:8000/notes/', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('access_token')}`
+            }
+        })
             .then(response => {
                 setNotes(response.data);
                 setLoading(false);
             })
             .catch(error => {
                 console.error('Ошибка при загрузке списка заметок:', error);
+                setError('Не удалось загрузить заметки');
                 setLoading(false);
             });
+
+        // Запрос для получения данных пользователя
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            axios.get('http://127.0.0.1:8000/user/', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    setUser(response.data);  // Сохраняем данные пользователя
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке данных пользователя:', error);
+                    // setError('Не удалось загрузить данные пользователя');
+                });
+        }
     }, []);
 
+    // Обработчик добавления заметки
     const handleAddNote = (e) => {
         e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        setLoading(true);
 
-        axios.post('http://127.0.0.1:8000/notes/', newNote)
+        axios.post('http://127.0.0.1:8000/notes/', newNote, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
             .then(response => {
-                setNotes([response.data, ...notes]); // Добавляем новую заметку в начало списка
-                setNewNote({ title: '', body: '', category: 'PERSONAL' }); // Очищаем форму
+                setNotes([response.data, ...notes]);
+                setNewNote({ title: '', body: '', category: 'PERSONAL' });
+                setLoading(false);
             })
             .catch(error => {
                 console.error('Ошибка при добавлении заметки:', error);
+                setError('Не удалось добавить заметку');
+                setLoading(false);
             });
     };
 
@@ -46,12 +81,32 @@ function Notes() {
         }));
     };
 
-    if (loading) {
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        window.location.reload();
+    };
+
+    if (loading && !error) {
         return <div style={styles.loader}>Загрузка...</div>;
     }
 
     return (
         <div style={styles.container}>
+            {error && <div style={styles.error}>{error}</div>}
+
+            {/* Отображение данных пользователя */}
+            {user ? (
+                <div style={styles.profile}>
+                    <p>Привет, {user.username}!</p>
+                    <button onClick={handleLogout} style={styles.logoutButton}>Выйти</button>
+                </div>
+            ) : (
+                <div style={styles.authButtons}>
+                    <Link to="/login" style={styles.loginButton}>Войти</Link>
+                    <Link to="/register" style={styles.registerButton}>Зарегистрироваться</Link>
+                </div>
+            )}
+
             <form onSubmit={handleAddNote} style={styles.form}>
                 <input
                     type="text"
@@ -82,7 +137,7 @@ function Notes() {
                         </option>
                     ))}
                 </select>
-                <button type="submit" style={styles.addButton}>Добавить заметку</button>
+                <button type="submit" style={styles.addButton} disabled={loading}>Добавить заметку</button>
             </form>
 
             <div style={styles.grid}>
@@ -92,8 +147,16 @@ function Notes() {
                         key={note.id}
                         style={{
                             ...styles.card,
-                            backgroundColor: note.is_done === "СДЕЛАНО" ? '#d4edda' : '#fff', // Если выполнено, зелёный фон
-                            borderColor: note.is_done === "СДЕЛАНО" ? '#28a745' : '#ccc' // Зелёная рамка для выполненных
+                            backgroundColor: note.is_done === "СДЕЛАНО"
+                                ? '#d4edda'
+                                : note.is_done === "В ПРОЦЕССЕ"
+                                    ? '#fff3cd'
+                                    : '#fff',
+                            borderColor: note.is_done === "СДЕЛАНО"
+                                ? '#28a745'
+                                : note.is_done === "В ПРОЦЕССЕ"
+                                    ? '#ffc107'
+                                    : '#ccc',
                         }}
                     >
                         <h2 style={styles.cardTitle}>{note.title}</h2>
@@ -115,6 +178,21 @@ const styles = {
         padding: '2px',
         backgroundColor: '#f4f4f9',
         minHeight: '100vh',
+    },
+    profile: {
+        marginBottom: '20px',
+        textAlign: 'center',
+    },
+    authButtons: {
+        marginBottom: '20px',
+        textAlign: 'center',
+        position:"absolute",
+        right:'181px',
+        top:'25px',
+        gap:'1px',
+        display:'flex',
+        fontSize:'18px'
+
     },
     form: {
         marginBottom: '20px',
@@ -191,6 +269,36 @@ const styles = {
         fontSize: '18px',
         color: '#888',
         marginTop: '20px',
+    },
+    error: {
+        color: 'red',
+        textAlign: 'center',
+        marginBottom: '20px',
+        fontSize: '16px',
+    },
+    logoutButton: {
+        backgroundColor: '#f44336',
+        color: '#fff',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+    },
+    loginButton: {
+        color: '#2196F3', // синий цвет текста
+        padding: '10px 20px',
+        textDecoration: 'none', // убираем подчеркивание
+        fontWeight: 'bold', // сделаем текст жирным (по желанию)
+        border: 'none', // убираем границу
+        cursor: 'pointer', // добавляем курсор для кнопки
+    },
+    registerButton: {
+        color: '#2196F3', // синий цвет текста
+        padding: '10px 20px',
+        textDecoration: 'none', // убираем подчеркивание
+        fontWeight: 'bold', // сделаем текст жирным (по желанию)
+        border: 'none', // убираем границу
+        cursor: 'pointer', // добавляем курсор для кнопки
     },
 };
 

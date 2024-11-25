@@ -14,21 +14,36 @@ function NoteDetail() {
     const { identifier } = useParams(); // Получаем slug или id из URL
     const navigate = useNavigate(); // Для перенаправления после удаления
 
+    // Получаем токен из localStorage или другого места
+    const token = localStorage.getItem('access_token');
+
     useEffect(() => {
-        axios.get(`http://127.0.0.1:8000/notes/${identifier}/`)
+        // Проверка на наличие токена
+        if (!token) {
+            alert("Пожалуйста, войдите в систему.");
+            navigate('/login'); // Перенаправление на страницу входа, если нет токена
+            return;
+        }
+
+        axios.get(`http://127.0.0.1:8000/notes/${identifier}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Добавляем токен в заголовки
+            },
+        })
             .then(response => {
                 setNote(response.data);
                 setFormData({
                     title: response.data.title,
                     body: response.data.body,
                     category: response.data.category,
-                    is_done: response.data.is_done, // Инициализируем статус
+                    is_done: response.data.is_done,
                 });
             })
             .catch(error => {
                 console.error('Ошибка при загрузке заметки:', error);
+                alert("Ошибка при загрузке заметки.");
             });
-    }, [identifier]);
+    }, [identifier, token, navigate]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -36,7 +51,11 @@ function NoteDetail() {
     };
 
     const updateNote = () => {
-        axios.put(`http://127.0.0.1:8000/notes/${identifier}/`, formData)
+        axios.put(`http://127.0.0.1:8000/notes/${identifier}/`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Добавляем токен в заголовки
+            },
+        })
             .then(() => {
                 alert("Заметка успешно обновлена!");
                 navigate(`/notes/${identifier}/`); // Обновление заметки
@@ -48,7 +67,11 @@ function NoteDetail() {
     };
 
     const deleteNote = () => {
-        axios.delete(`http://127.0.0.1:8000/notes/${identifier}/`)
+        axios.delete(`http://127.0.0.1:8000/notes/${identifier}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Добавляем токен в заголовки
+            },
+        })
             .then(() => {
                 alert("Заметка успешно удалена!");
                 navigate('/notes'); // Перенаправляем на список заметок

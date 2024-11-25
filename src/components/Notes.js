@@ -8,6 +8,7 @@ function Notes() {
     const [newNote, setNewNote] = useState({ title: '', body: '', category: 'PERSONAL' });
     const [error, setError] = useState(null);
     const [user, setUser] = useState(null);  // Хранение данных пользователя
+    const [totalNotesCount, setTotalNotesCount] = useState(0);  // Хранение общего количества заметок
 
     const categories = [
         { value: 'BUSINESS', label: 'Business' },
@@ -23,7 +24,8 @@ function Notes() {
             }
         })
             .then(response => {
-                setNotes(response.data);
+                setNotes(response.data.notes);  // Сохраняем заметки
+                setTotalNotesCount(response.data.total_notes_count);  // Сохраняем количество заметок
                 setLoading(false);
             })
             .catch(error => {
@@ -45,7 +47,6 @@ function Notes() {
                 })
                 .catch(error => {
                     console.error('Ошибка при загрузке данных пользователя:', error);
-                    // setError('Не удалось загрузить данные пользователя');
                 });
         }
     }, []);
@@ -63,6 +64,7 @@ function Notes() {
         })
             .then(response => {
                 setNotes([response.data, ...notes]);
+                setTotalNotesCount(totalNotesCount + 1);  // Обновляем количество заметок
                 setNewNote({ title: '', body: '', category: 'PERSONAL' });
                 setLoading(false);
             })
@@ -106,6 +108,11 @@ function Notes() {
                     <Link to="/register" style={styles.registerButton}>Зарегистрироваться</Link>
                 </div>
             )}
+
+            {/* Отображение общего количества заметок */}
+            <div style={styles.notesCount}>
+                <p>Всего заметок: {totalNotesCount}</p>
+            </div>
 
             <form onSubmit={handleAddNote} style={styles.form}>
                 <input
@@ -192,7 +199,6 @@ const styles = {
         gap:'1px',
         display:'flex',
         fontSize:'18px'
-
     },
     form: {
         marginBottom: '20px',
@@ -261,28 +267,17 @@ const styles = {
     },
     cardStatus: {
         fontSize: '12px',
-        color: '#888',
+        color: '#999',
         marginTop: '10px',
     },
-    loader: {
-        textAlign: 'center',
-        fontSize: '18px',
-        color: '#888',
-        marginTop: '20px',
-    },
-    error: {
-        color: 'red',
-        textAlign: 'center',
-        marginBottom: '20px',
-        fontSize: '16px',
-    },
     logoutButton: {
-        backgroundColor: '#f44336',
-        color: '#fff',
-        padding: '10px 20px',
+        backgroundColor: '#d9534f',
+        color: 'white',
         border: 'none',
-        borderRadius: '5px',
+        padding: '8px 16px',
         cursor: 'pointer',
+        borderRadius: '5px',
+        fontSize: '16px',
     },
     loginButton: {
         color: '#2196F3', // синий цвет текста
@@ -300,6 +295,21 @@ const styles = {
         border: 'none', // убираем границу
         cursor: 'pointer', // добавляем курсор для кнопки
     },
+    notesCount: {
+        marginBottom: '20px',
+        fontSize: '20px',
+        textAlign: 'center',
+    },
+    loader: {
+        textAlign: 'center',
+        fontSize: '24px',
+        marginTop: '20px',
+    },
+    error: {
+        color: 'red',
+        textAlign: 'center',
+        fontSize: '18px',
+    }
 };
 
 export default Notes;

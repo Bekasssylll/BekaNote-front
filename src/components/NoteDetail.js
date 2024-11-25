@@ -21,7 +21,7 @@ function NoteDetail() {
         // Проверка на наличие токена
         if (!token) {
             alert("Пожалуйста, войдите в систему.");
-            navigate('/login'); // Перенаправление на страницу входа, если нет токена
+            navigate('/login');
             return;
         }
 

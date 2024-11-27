@@ -16,7 +16,7 @@ function App() {
                     <div style={styles.logoContainer}>
                         <Link to="/">
                             <img
-                                src="https://aroundsketch.github.io/Apple-App-Icons/App-Icon/Apple/Notes/@PNG.png"
+                                src="/arsen.png"
                                 alt="BekaNote Logo"
                                 style={styles.logo}
                             />

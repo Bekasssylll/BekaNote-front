@@ -9,6 +9,8 @@ function Notes() {
     const [error, setError] = useState(null);
     const [user, setUser] = useState(null);  // Хранение данных пользователя
     const [totalNotesCount, setTotalNotesCount] = useState(0);  // Хранение общего количества заметок
+    const [donedNotes, setDonedNotes] = useState(0);  // Хранение количества завершенных заметок
+    const [notDonedNotes, setNotDonedNotes] = useState(0);
 
     const categories = [
         { value: 'BUSINESS', label: 'Business' },
@@ -24,8 +26,16 @@ function Notes() {
             }
         })
             .then(response => {
-                setNotes(response.data.notes);  // Сохраняем заметки
+                const notesData = response.data.notes;
+                setNotes(notesData);  // Сохраняем заметки
                 setTotalNotesCount(response.data.total_notes_count);  // Сохраняем количество заметок
+
+                // Подсчитываем количество завершенных заметок
+                const completedNotes = notesData.filter(note => note.is_done === "СДЕЛАНО").length;
+                setDonedNotes(completedNotes);  // Обновляем количество завершенных заметок
+                const notCompletedNotes = notesData.filter(note => note.is_done !== "СДЕЛАНО").length;
+                setNotDonedNotes(notCompletedNotes);
+
                 setLoading(false);
             })
             .catch(error => {
@@ -109,9 +119,18 @@ function Notes() {
                 </div>
             )}
 
-            {/* Отображение общего количества заметок */}
-            <div style={styles.notesCount}>
-                <p>Всего заметок: {totalNotesCount}</p>
+            <div style={styles.parentCount}>
+                <div style={styles.notesCount}>
+                    <p>Всего заметок: {totalNotesCount}</p>
+                </div>
+
+            {/* Отображение количества завершенных заметок */}
+                <div style={styles.donedNotesCount}>
+                    <p>Завершенные заметки: {donedNotes}</p>
+                </div>
+                <div style={styles.notDonedNotesCount}>
+                    <p>Незавершенные заметки: {notDonedNotes}</p>
+                </div>
             </div>
 
             <form onSubmit={handleAddNote} style={styles.form}>
@@ -247,37 +266,44 @@ const styles = {
     },
     card: {
         display: 'block',
-        padding: '15px',
-        textDecoration: 'none',
-        color: '#333',
-        borderRadius: '8px',
+        padding: '20px',
         backgroundColor: '#fff',
+        borderRadius: '8px',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        border: '1px solid #ccc',
+        textDecoration: 'none',
+        color: '#000',
     },
     cardTitle: {
-        fontSize: '20px',
+        fontSize: '18px',
         fontWeight: 'bold',
-        marginBottom: '10px',
     },
     cardContent: {
-        fontSize: '14px',
-        color: '#555',
+        fontSize: '16px',
+        marginBottom: '10px',
     },
     cardStatus: {
-        fontSize: '12px',
-        color: '#999',
-        marginTop: '10px',
+        fontSize: '14px',
+        color: '#777',
     },
+    loader: {
+        textAlign: 'center',
+        fontSize: '18px',
+        color: '#555',
+        padding: '50px',
+    },
+    error: {
+        color: 'red',
+        textAlign: 'center',
+        marginBottom: '20px',
+    },
+
     logoutButton: {
         backgroundColor: '#d9534f',
-        color: 'white',
+        color: '#fff',
+        padding: '10px 20px',
         border: 'none',
-        padding: '8px 16px',
-        cursor: 'pointer',
         borderRadius: '5px',
-        fontSize: '16px',
+        cursor: 'pointer',
     },
     loginButton: {
         color: '#2196F3', // синий цвет текста
@@ -295,21 +321,46 @@ const styles = {
         border: 'none', // убираем границу
         cursor: 'pointer', // добавляем курсор для кнопки
     },
-    notesCount: {
-        marginBottom: '20px',
+    notDonedNotesCount: {
         fontSize: '20px',
         textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column', // Элементы располагаются друг под другом внутри блока
+        margin: '0', // Убираем лишние отступы
+        padding: '0',
     },
-    loader: {
+
+    donedNotesCount: {
+        fontSize: '20px',
         textAlign: 'center',
-        fontSize: '24px',
-        marginTop: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '0',
+        padding: '0',
     },
-    error: {
-        color: 'red',
+
+    notesCount: {
+        fontSize: '20px',
         textAlign: 'center',
-        fontSize: '18px',
-    }
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '0',
+        padding: '0',
+    },
+
+    parentCount: {
+        display: 'flex', // Используем flexbox
+        flexDirection: 'row', // Элементы в строку
+        justifyContent: 'center', // Горизонтальное выравнивание
+        alignItems: 'center', // Вертикальное выравнивание
+        gap: '20px', // Расстояние между элементами
+        width: '100%', // Заполнение всей ширины
+        padding: '1px', // Внутренний отступ для аккуратного вида
+        margin: '0', // Убираем лишние внешние отступы
+    },
+
+
+
 };
 
 export default Notes;

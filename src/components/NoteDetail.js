@@ -8,17 +8,15 @@ function NoteDetail() {
         title: '',
         body: '',
         category: '',
-        is_done: '', // Добавляем статус
+        is_done: '',
     });
 
-    const { identifier } = useParams(); // Получаем slug или id из URL
-    const navigate = useNavigate(); // Для перенаправления после удаления
+    const { identifier } = useParams();
+    const navigate = useNavigate();
 
-    // Получаем токен из localStorage или другого места
     const token = localStorage.getItem('access_token');
 
     useEffect(() => {
-        // Проверка на наличие токена
         if (!token) {
             alert("Пожалуйста, войдите в систему.");
             navigate('/login');
@@ -27,7 +25,7 @@ function NoteDetail() {
 
         axios.get(`http://127.0.0.1:8000/notes/${identifier}/`, {
             headers: {
-                Authorization: `Bearer ${token}`, // Добавляем токен в заголовки
+                Authorization: `Bearer ${token}`,
             },
         })
             .then(response => {
@@ -53,12 +51,12 @@ function NoteDetail() {
     const updateNote = () => {
         axios.put(`http://127.0.0.1:8000/notes/${identifier}/`, formData, {
             headers: {
-                Authorization: `Bearer ${token}`, // Добавляем токен в заголовки
+                Authorization: `Bearer ${token}`,
             },
         })
             .then(() => {
                 alert("Заметка успешно обновлена!");
-                navigate(`/notes/${identifier}/`); // Обновление заметки
+                navigate(`/notes/${identifier}/`);
             })
             .catch(error => {
                 console.error("Ошибка при обновлении заметки:", error);
@@ -69,12 +67,12 @@ function NoteDetail() {
     const deleteNote = () => {
         axios.delete(`http://127.0.0.1:8000/notes/${identifier}/`, {
             headers: {
-                Authorization: `Bearer ${token}`, // Добавляем токен в заголовки
+                Authorization: `Bearer ${token}`,
             },
         })
             .then(() => {
                 alert("Заметка успешно удалена!");
-                navigate('/notes'); // Перенаправляем на список заметок
+                navigate('/notes');
             })
             .catch(error => {
                 console.error("Ошибка при удалении заметки:", error);

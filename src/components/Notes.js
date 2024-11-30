@@ -7,9 +7,9 @@ function Notes() {
     const [loading, setLoading] = useState(true);
     const [newNote, setNewNote] = useState({ title: '', body: '', category: 'PERSONAL' });
     const [error, setError] = useState(null);
-    const [user, setUser] = useState(null);  // Хранение данных пользователя
-    const [totalNotesCount, setTotalNotesCount] = useState(0);  // Хранение общего количества заметок
-    const [donedNotes, setDonedNotes] = useState(0);  // Хранение количества завершенных заметок
+    const [user, setUser] = useState(null);
+    const [totalNotesCount, setTotalNotesCount] = useState(0);
+    const [donedNotes, setDonedNotes] = useState(0);
     const [notDonedNotes, setNotDonedNotes] = useState(0);
 
     const categories = [
@@ -17,9 +17,8 @@ function Notes() {
         { value: 'PERSONAL', label: 'Personal' },
         { value: 'IMPORTANT', label: 'Important' },
     ];
-
+// PATTERN OBSERVER
     useEffect(() => {
-        // Запрос для получения заметок
         axios.get('http://127.0.0.1:8000/notes/', {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('access_token')}`
@@ -27,12 +26,11 @@ function Notes() {
         })
             .then(response => {
                 const notesData = response.data.notes;
-                setNotes(notesData);  // Сохраняем заметки
-                setTotalNotesCount(response.data.total_notes_count);  // Сохраняем количество заметок
+                setNotes(notesData);
+                setTotalNotesCount(response.data.total_notes_count);
 
-                // Подсчитываем количество завершенных заметок
                 const completedNotes = notesData.filter(note => note.is_done === "СДЕЛАНО").length;
-                setDonedNotes(completedNotes);  // Обновляем количество завершенных заметок
+                setDonedNotes(completedNotes);
                 const notCompletedNotes = notesData.filter(note => note.is_done !== "СДЕЛАНО").length;
                 setNotDonedNotes(notCompletedNotes);
 
@@ -44,7 +42,6 @@ function Notes() {
                 setLoading(false);
             });
 
-        // Запрос для получения данных пользователя
         const token = localStorage.getItem('access_token');
         if (token) {
             axios.get('http://127.0.0.1:8000/user/', {
@@ -53,7 +50,7 @@ function Notes() {
                 }
             })
                 .then(response => {
-                    setUser(response.data);  // Сохраняем данные пользователя
+                    setUser(response.data);
                 })
                 .catch(error => {
                     console.error('Ошибка при загрузке данных пользователя:', error);
@@ -61,7 +58,6 @@ function Notes() {
         }
     }, []);
 
-    // Обработчик добавления заметки
     const handleAddNote = (e) => {
         e.preventDefault();
         const token = localStorage.getItem('access_token');
@@ -74,7 +70,7 @@ function Notes() {
         })
             .then(response => {
                 setNotes([response.data, ...notes]);
-                setTotalNotesCount(totalNotesCount + 1);  // Обновляем количество заметок
+                setTotalNotesCount(totalNotesCount + 1);
                 setNewNote({ title: '', body: '', category: 'PERSONAL' });
                 setLoading(false);
             })
@@ -106,7 +102,6 @@ function Notes() {
         <div style={styles.container}>
             {error && <div style={styles.error}>{error}</div>}
 
-            {/* Отображение данных пользователя */}
             {user ? (
                 <div style={styles.profile}>
                     <p>Привет, {user.username}!</p>
@@ -116,6 +111,9 @@ function Notes() {
                 <div style={styles.authButtons}>
                     <Link to="/login" style={styles.loginButton}>Войти</Link>
                     <Link to="/register" style={styles.registerButton}>Зарегистрироваться</Link>
+                    <Link to="https://t.me/BekossykBot" style={styles.telegramButton} target="_blank" rel="noopener noreferrer">
+                        <img src="/Telegram_logo.svg.webp" alt="T" style={styles.telegramImage} />
+                    </Link>
                 </div>
             )}
 
@@ -124,7 +122,6 @@ function Notes() {
                     <p>Всего заметок: {totalNotesCount}</p>
                 </div>
 
-            {/* Отображение количества завершенных заметок */}
                 <div style={styles.donedNotesCount}>
                     <p>Завершенные заметки: {donedNotes}</p>
                 </div>
@@ -306,27 +303,30 @@ const styles = {
         cursor: 'pointer',
     },
     loginButton: {
-        color: '#2196F3', // синий цвет текста
+        color: '#2196F3',
         padding: '10px 20px',
-        textDecoration: 'none', // убираем подчеркивание
-        fontWeight: 'bold', // сделаем текст жирным (по желанию)
-        border: 'none', // убираем границу
-        cursor: 'pointer', // добавляем курсор для кнопки
+        textDecoration: 'none',
+        fontWeight: 'bold',
+        border: 'none',
+        cursor: 'pointer',
+        // marginLeft:'350px',
+
     },
     registerButton: {
-        color: '#2196F3', // синий цвет текста
+        color: '#2196F3',
         padding: '10px 20px',
-        textDecoration: 'none', // убираем подчеркивание
-        fontWeight: 'bold', // сделаем текст жирным (по желанию)
-        border: 'none', // убираем границу
-        cursor: 'pointer', // добавляем курсор для кнопки
+        textDecoration: 'none',
+        fontWeight: 'bold',
+        border: 'none',
+        cursor: 'pointer',
+        // marginLeft:'60px',
     },
     notDonedNotesCount: {
         fontSize: '20px',
         textAlign: 'center',
         display: 'flex',
-        flexDirection: 'column', // Элементы располагаются друг под другом внутри блока
-        margin: '0', // Убираем лишние отступы
+        flexDirection: 'column',
+        margin: '0',
         padding: '0',
     },
 
@@ -349,15 +349,27 @@ const styles = {
     },
 
     parentCount: {
-        display: 'flex', // Используем flexbox
-        flexDirection: 'row', // Элементы в строку
-        justifyContent: 'center', // Горизонтальное выравнивание
-        alignItems: 'center', // Вертикальное выравнивание
-        gap: '20px', // Расстояние между элементами
-        width: '100%', // Заполнение всей ширины
-        padding: '1px', // Внутренний отступ для аккуратного вида
-        margin: '0', // Убираем лишние внешние отступы
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '20px',
+        width: '100%',
+        padding: '1px',
+        margin: '0',
     },
+    telegramButton: {
+        padding: '10px 20px',
+        backgroundColor: '#0088cc',
+        color: '#fff',
+        textDecoration: 'none',
+        borderRadius: '5px',
+    },
+    telegramImage:{
+        width:'30x',
+        height:'20px'
+    }
+
 
 
 

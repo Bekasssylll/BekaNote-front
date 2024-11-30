@@ -28,9 +28,8 @@ function Register() {
 
         try {
             const response = await axios.post('http://127.0.0.1:8000/api/register/', formData);
-            // Сохраняем токен после регистрации
             localStorage.setItem('access_token', response.data.access_token);
-            navigate('/profile');  // Перенаправляем на страницу профиля после успешной регистрации
+            navigate('/profile');
         } catch (error) {
             setError(error.response?.data?.detail || 'Произошла ошибка при регистрации');
         }

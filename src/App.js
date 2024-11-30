@@ -1,14 +1,14 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes, Navigate, Link} from 'react-router-dom';
 import Notes from './components/Notes';
 import NoteDetail from './components/NoteDetail';
-import Register from './components/Register';  // Импортируем компонент регистрации
+import Register from './components/Register';
 import Profile from './components/Profile';
 import Login from "./components/Login";
 
 function App() {
     const isAuthenticated = localStorage.getItem('access_token');
-
+//PATTERN COMPOSITE
     return (
         <Router>
             <div>
@@ -25,7 +25,6 @@ function App() {
                     <h1 style={styles.title}>BekaNote</h1>
                 </div>
 
-                {/* Навигация для зарегистрированных пользователей */}
                 <div style={styles.navContainer}>
                     {!isAuthenticated && (
                         <>
@@ -36,15 +35,24 @@ function App() {
                     {isAuthenticated && (
                         <Link to="/profile" style={styles.navButton}>Мой профиль</Link>
                     )}
+
+                    {/* Добавляем иконку Telegram */}
+                    {/*<a href="https://t.me/your_telegram" target="_blank" rel="noopener noreferrer" style={styles.telegramLink}>*/}
+                    {/*    <img*/}
+                    {/*        src="/telegram-icon.png"  // Замените на путь к вашему изображению Telegram*/}
+                    {/*        alt="Telegram"*/}
+                    {/*        style={styles.telegramIcon}*/}
+                    {/*    />*/}
+                    {/*</a>*/}
                 </div>
 
                 <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={<Navigate to="/notes" replace />} />
-                    <Route path="/notes" element={<Notes />} />
-                    <Route path="/notes/:identifier" element={<NoteDetail />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" replace />} />
+                    <Route path="/login" element={<Login/>}/>
+                    <Route path="/" element={<Navigate to="/notes" replace/>}/>
+                    <Route path="/notes" element={<Notes/>}/>
+                    <Route path="/notes/:identifier" element={<NoteDetail/>}/>
+                    <Route path="/register" element={<Register/>}/>
+                    <Route path="/profile" element={isAuthenticated ? <Profile/> : <Navigate to="/login" replace/>}/>
                 </Routes>
             </div>
         </Router>
@@ -78,13 +86,13 @@ const styles = {
         margin: '0',
     },
     navButton: {
-        margin: '1px 20px',
+        margin: '1px 1px',
         fontSize: '18px',
         color: '#2196F3',
         textDecoration: 'none',
         padding: '10px',
         display: 'inline-block',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
     },
     navContainer: {
         display: 'flex',
@@ -95,6 +103,15 @@ const styles = {
         right: '15px',
         top: '4px',
     },
+    // telegramLink: {
+    //     marginLeft: '30px',  // Добавляем немного отступа от других кнопок
+    // },
+    // telegramIcon: {
+    //     width: '30px',  // Размер иконки
+    //     height: '30px',
+    //     borderRadius: '50%',
+    //     cursor: 'pointer',
+    // },
 };
 
 export default App;

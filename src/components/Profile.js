@@ -5,7 +5,7 @@ function Profile() {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [editing, setEditing] = useState(false); // Состояние для редактирования
+    const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
@@ -19,7 +19,7 @@ function Profile() {
             })
                 .then(response => {
                     setUser(response.data);
-                    setFormData(response.data); // Заполняем начальные данные формы
+                    setFormData(response.data);
                     setLoading(false);
                 })
                 .catch(error => {
@@ -55,7 +55,7 @@ function Profile() {
         })
             .then(response => {
                 setUser(response.data);
-                setEditing(false); // Выключаем режим редактирования после успешного обновления
+                setEditing(false);
                 setError(null);
             })
             .catch(error => {
